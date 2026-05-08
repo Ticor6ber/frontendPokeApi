@@ -5,97 +5,88 @@
 
   <style>
     body {
-  font-family: Arial, sans-serif;
-  background: #f2f2f2;
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
 
-/* Contenedor vertical */
-body {
-  flex-direction: column;
-}
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
 
-/* Título */
-h2 {
-  margin-bottom: 20px;
-  color: #333;
-}
+    input {
+      width: 250px;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
 
-/* Input */
-input {
-  width: 250px;
-  padding: 12px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 16px;
-}
+    button {
+      width: 220px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #e63946;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
 
-/* Botones */
-button {
-  width: 200px;
-  padding: 12px;
-  margin-bottom: 10px;
-  border: none;
-  border-radius: 8px;
-  background-color: #e63946;
-  color: white;
-  font-size: 15px;
-  cursor: pointer;
-}
+    button:hover {
+      background-color: #c1121f;
+    }
 
-button:hover {
-  background-color: #c1121f;
-}
+    #resultado {
+      margin-top: 15px;
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: left;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
 
-/* Resultado */
-#resultado {
-  margin-top: 15px;
-  background: white;
-  padding: 15px;
-  border-radius: 10px;
-  width: 260px;
-  text-align: left;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+    }
 
-/* Modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
-}
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      gap: 20px;
+    }
 
-.modal-content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  display: flex;
-  gap: 20px;
-}
+    .modal img {
+      width: 120px;
+    }
 
-.modal img {
-  width: 120px;
-}
-
-.close {
-  position: absolute;
-  top: 15px;
-  right: 25px;
-  color: white;
-  font-size: 28px;
-  cursor: pointer;
-}
+    .close {
+      position: absolute;
+      top: 15px;
+      right: 25px;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -104,67 +95,148 @@ button:hover {
 <h2>Consultar Pokémon</h2>
 
 <input type="text" id="nombre" placeholder="Nombre del Pokémon">
-<button onclick="consultar()">Consultar</button>
+
+<!-- BOTÓN SQL -->
+<button onclick="consultarSQL()">
+  Consultar SQL
+</button>
+
+<!-- BOTÓN NOSQL -->
+<button onclick="consultarMongo()">
+  Consultar MongoDB
+</button>
 
 <div id="resultado"></div>
 
-<button onclick="verImagenes()">Ver imágenes</button>
+<button onclick="verImagenes()">
+  Ver imágenes
+</button>
 
 <!-- MODAL -->
 <div id="modal" class="modal">
   <span class="close" onclick="cerrarModal()">&times;</span>
 
-  <div class="modal-content" id="modalContent">
-    <!-- Imágenes aquí -->
-  </div>
+  <div class="modal-content" id="modalContent"></div>
 </div>
 
 <script>
+
 let dataGlobal = null;
 
-async function consultar() {
+/* =========================
+   CONSULTA SQL
+========================= */
+async function consultarSQL() {
+
   const nombre = document.getElementById("nombre").value.trim();
 
   const resultadoDiv = document.getElementById("resultado");
+
   dataGlobal = null;
 
   resultadoDiv.innerHTML = "";
 
   if (!nombre) {
-    resultadoDiv.innerHTML = `<p style="color:red;">Ingresa un nombre de Pokémon</p>`;
+    resultadoDiv.innerHTML =
+      `<p style="color:red;">Ingresa un Pokémon</p>`;
     return;
   }
 
   try {
-    const res = await fetch(`https://backendpokeapi-rtnn.onrender.com/pokemon/${nombre}`);
+
+    const res = await fetch(
+      `https://backendpokeapi-rtnn.onrender.com/pokemon/${nombre}`
+    );
 
     if (!res.ok) throw new Error();
 
     const data = await res.json();
+
     dataGlobal = data;
 
-    resultadoDiv.innerHTML = `
-      <p><strong>Altura:</strong> ${data.altura}</p>
-      <p><strong>Peso:</strong> ${data.peso}</p>
-      <p><strong>Habilidades:</strong> ${data.habilidades.join(", ")}</p>
-    `;
+    mostrarResultado(data, "SQL");
 
   } catch (error) {
+
     resultadoDiv.innerHTML = `
       <p style="color:red;">
-        El Pokémon no fue encontrado. Ingresa otro nombre.
+        Pokémon no encontrado en SQL
       </p>
     `;
   }
 }
 
+/* =========================
+   CONSULTA MONGODB
+========================= */
+async function consultarMongo() {
+
+  const nombre = document.getElementById("nombre").value.trim();
+
+  const resultadoDiv = document.getElementById("resultado");
+
+  dataGlobal = null;
+
+  resultadoDiv.innerHTML = "";
+
+  if (!nombre) {
+    resultadoDiv.innerHTML =
+      `<p style="color:red;">Ingresa un Pokémon</p>`;
+    return;
+  }
+
+  try {
+
+    const res = await fetch(
+      `http://localhost:3001/pokemon/${nombre}`
+    );
+
+    if (!res.ok) throw new Error();
+
+    const data = await res.json();
+
+    dataGlobal = data;
+
+    mostrarResultado(data, "MongoDB");
+
+  } catch (error) {
+
+    resultadoDiv.innerHTML = `
+      <p style="color:red;">
+        Pokémon no encontrado en MongoDB
+      </p>
+    `;
+  }
+}
+
+/* =========================
+   MOSTRAR RESULTADOS
+========================= */
+function mostrarResultado(data, origen) {
+
+  const resultadoDiv = document.getElementById("resultado");
+
+  resultadoDiv.innerHTML = `
+    <p><strong>Base de datos:</strong> ${origen}</p>
+    <p><strong>Nombre:</strong> ${data.nombre}</p>
+    <p><strong>Altura:</strong> ${data.altura}</p>
+    <p><strong>Peso:</strong> ${data.peso}</p>
+    <p><strong>Habilidades:</strong> ${data.habilidades.join(", ")}</p>
+  `;
+}
+
+/* =========================
+   VER IMÁGENES
+========================= */
 function verImagenes() {
+
   if (!dataGlobal) {
-    alert("Primero consulta un Pokémon válido");
+    alert("Primero consulta un Pokémon");
     return;
   }
 
   const modal = document.getElementById("modal");
+
   const content = document.getElementById("modalContent");
 
   content.innerHTML = `
@@ -175,17 +247,22 @@ function verImagenes() {
   modal.style.display = "flex";
 }
 
+/* =========================
+   CERRAR MODAL
+========================= */
 function cerrarModal() {
   document.getElementById("modal").style.display = "none";
 }
 
-// Cerrar si se da click fuera
 window.onclick = function(event) {
+
   const modal = document.getElementById("modal");
+
   if (event.target === modal) {
     cerrarModal();
   }
 }
+
 </script>
 
 </body>
