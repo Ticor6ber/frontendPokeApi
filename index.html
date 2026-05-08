@@ -136,7 +136,7 @@ async function consultar() {
   }
 
   try {
-    const res = await fetch(`http://localhost:3000/pokemon/${nombre}`);
+    const res = await fetch(`https://backendpokeapi-rtnn.onrender.com/pokemon/${nombre}`);
 
     if (!res.ok) throw new Error();
 
