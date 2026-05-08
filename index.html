@@ -188,7 +188,7 @@ async function consultarMongo() {
   try {
 
     const res = await fetch(
-      `http://localhost:3001/pokemon/${nombre}`
+      `https://backendpokeapi-1.onrender.com/pokemon/${nombre}`
     );
 
     if (!res.ok) throw new Error();
